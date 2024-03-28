@@ -138,6 +138,18 @@ function getInfoCPU() {
 }
 
 function getCpuLoad() {
+    try {
+        const stdout = execSync(`powershell -Command "(Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples.CookedValue"`).toString();
+        console.log('getCpuLoad', stdout);
+        const cpuLoad = parseInt(stdout.trim());
+        return cpuLoad;
+    } catch (error) {
+        console.error(`Ошибка при получении загрузки CPU: ${error}`);
+        return 0; // или другое значение, указывающее на ошибку
+    }
+}
+
+/* function getCpuLoad() {
     const cpus = os.cpus();
     let totalIdleTime = 0;
     let totalTickTime = 0;
@@ -153,7 +165,7 @@ function getCpuLoad() {
     const totalLoad = Math.round((1 - idleTimePerCpu / totalTimePerCpu) * 100);
 
     return totalLoad;
-}
+} */
 
 function getModelCPU() {
     const cpus = os.cpus();
