@@ -1,16 +1,19 @@
+Приложение для установки на windows компьютер.
+Через планировщик задача надо делать запуск при включении 
+компьютера с правами администратора.
+Приложение подключается по вєб сокету к серверу и отправляет
+о себе данные периодически, а так же слушает команды от сервера
+которые выполняет в PowerShell.
 
-<h3>Создание нового проекта</h3>
 
-Сначала надо вручную создать репозиторий на github
-https://github.com/ixaker?tab=repositories
+<h3>Упаковка в *.exe файл для запуска на windows</h3>
+pkg index.js --targets node18-win-x64
 
-Локально выполнить следующие команды:
-rm -rf .git
+// включение разрешения исполнения скриптов PowerShell
+Set-ExecutionPolicy RemoteSigned
 
-git init
-git add .
-git commit -m "first commit"
-git branch -M main
-git remote add origin git@github.com:ixaker/ИМЯ_РЕПОЗИТОРИЯ.git
-git push -u origin main --force
+// запуск в режиме разработки
+npm run dev
 
+
+Для нормальной работы запускать проект надо с правами администратора
