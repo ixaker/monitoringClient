@@ -1,13 +1,9 @@
 const device = require('./device');
 const { io } = require('socket.io-client');
 const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
 
 const isAdmin = checkIfAdmin();
 const socket = io('http://monitoring.qpart.com.ua:5000', { extraHeaders: { "type": "device" }});
-
-
 
 socket.on("connect_error", (error) => {
     console.error('Connect_error:', error.type, error);
@@ -36,7 +32,7 @@ socket.on("message", (data) => {
 function send(topic, payload) {
     try {
         if (socket.connected) {
-            console.log('send', topic);
+            console.log('send', topic, payload);
             socket.send(JSON.stringify({ topic: topic, payload: payload }));    
         }    
     } catch (error) {

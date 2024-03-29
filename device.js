@@ -196,32 +196,32 @@ function getInfoDisk(errors, isAdmin) {
     const disks = nodeDiskInfo.getDiskInfoSync();
 
     const diskInfo = disks.map(disk => {
-    const totalGB = +(disk._blocks / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
-    const usedGB = +(disk._used / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
-    const availableGB = +(disk._available / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
-    const capacity = parseInt(disk._capacity); // Удаление символа '%' и преобразование в число
-    let bitLocker = { "crypt": false, "locked": false }
+        const totalGB = +(disk._blocks / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
+        const usedGB = +(disk._used / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
+        const availableGB = +(disk._available / 1024 / 1024 / 1024).toFixed(2); // Преобразование из байтов в гигабайты
+        const capacity = parseInt(disk._capacity); // Удаление символа '%' и преобразование в число
+        let bitLocker = { "crypt": false, "locked": false }
 
-    try {
-        if (isAdmin) {
-            bitLocker = getInfoBitLocker(disk._mounted);
+        try {
+            if (isAdmin) {
+                bitLocker = getInfoBitLocker(disk._mounted);
+            }
+            
+        } catch (error) {
+            errors.push({name: 'ERROR - getInfoBitLocker', error: `${disk._mounted} Ошибка при получении информации о BitLocker, возможно нет прав администратора`});
+            console.error(`${disk._mounted} Ошибка при получении информации о BitLocker, возможно нет прав администратора`, error);
         }
         
-    } catch (error) {
-        errors.push({name: 'ERROR - getInfoBitLocker', error: `${disk._mounted} Ошибка при получении информации о BitLocker, возможно нет прав администратора`});
-        console.error(`${disk._mounted} Ошибка при получении информации о BitLocker, возможно нет прав администратора`, error);
-    }
-    
-
-    return {
-        mounted: disk._mounted,
-        total: totalGB,
-        used: usedGB,
-        available: availableGB,
-        procent: capacity,
-        crypt: bitLocker.crypt,
-        locked: bitLocker.locked
-    };
+        return {
+            filesystem: disk._filesystem,
+            mounted: disk._mounted,
+            total: totalGB,
+            used: usedGB,
+            available: availableGB,
+            procent: capacity,
+            crypt: bitLocker.crypt,
+            locked: bitLocker.locked
+        };
     });
 
     return diskInfo;
