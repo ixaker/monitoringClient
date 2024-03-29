@@ -149,24 +149,6 @@ function getCpuLoad() {
     }
 }
 
-/* function getCpuLoad() {
-    const cpus = os.cpus();
-    let totalIdleTime = 0;
-    let totalTickTime = 0;
-
-    cpus.forEach((cpu) => {
-        const { idle, user, nice, sys, irq } = cpu.times;
-        totalIdleTime += idle;
-        totalTickTime += user + nice + sys + idle + irq;
-    });
-
-    const idleTimePerCpu = totalIdleTime / cpus.length;
-    const totalTimePerCpu = totalTickTime / cpus.length;
-    const totalLoad = Math.round((1 - idleTimePerCpu / totalTimePerCpu) * 100);
-
-    return totalLoad;
-} */
-
 function getModelCPU() {
     const cpus = os.cpus();
     if (cpus && cpus.length > 0) {
@@ -248,17 +230,24 @@ function getInfoDisk(errors, isAdmin) {
 function getInfoBitLocker(drive) {
     const result = { "crypt": false, "locked": false };
 
-    const output = execSync(`manage-bde -status ${drive}`).toString();
+    // Get-BitLockerVolume -MountPoint 'C:' | Select-Object MountPoint, VolumeStatus, ProtectionStatus, EncryptionPercentage, LockStatus
+    const command = `powershell "Get-BitLockerVolume -MountPoint '${drive}' | Select-Object MountPoint, VolumeStatus, ProtectionStatus, EncryptionPercentage, LockStatus"`;
+    const output = execSync(command).toString();
+    
+    // Get-BitLockerVolume -MountPoint "C:" | Select-Object MountPoint, VolumeStatus, ProtectionStatus, EncryptionPercentage, LockStatus
+    //  MountPoint           : C:
+    //  VolumeStatus         : FullyDecrypted
+    //  ProtectionStatus     : Off
+    //  EncryptionPercentage : 0
+    //  LockStatus           : Unlocked
 
     // Проверяем, включен ли BitLocker
-    if (output.includes('Conversion Status:    Fully Decrypted')) {
-        result.crypt = false;
-    }else{
+    if(!output.includes('VolumeStatus         : FullyDecrypted')) {
         result.crypt = true;
     }
 
     // Проверяем, заблокирован ли диск
-    if (output.includes('Lock Status:          Locked')) {
+    if (output.includes('LockStatus           : Locked')) {
         result.locked = true;
     }
 
