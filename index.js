@@ -3,7 +3,7 @@ const { io } = require('socket.io-client');
 const { execSync } = require('child_process');
 
 const isAdmin = checkIfAdmin();
-const socket = io('http://monitoring.qpart.com.ua:5000', { extraHeaders: { "type": "device" }});
+const socket = io('https://monitoring.qpart.com.ua:5000', { extraHeaders: { "type": "device" }});
 
 socket.on("connect_error", (error) => {
     console.error('Connect_error:', error.type, error);
