@@ -113,7 +113,7 @@ function getUpTime() {
 
 function getDaysWord(days) {
     if (days % 100 >= 11 && days % 100 <= 19) {
-        return 'дней';
+        return 'днів';
     } else {
         switch (days % 10) {
             case 1:
@@ -123,7 +123,7 @@ function getDaysWord(days) {
             case 4:
                 return 'дня';
             default:
-                return 'дней';
+                return 'днів';
         }
     }
 }
