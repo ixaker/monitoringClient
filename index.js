@@ -32,7 +32,7 @@ socket.on("message", (data) => {
 function send(topic, payload) {
     try {
         if (socket.connected) {
-            console.log('send', topic, payload);
+            console.log('send', topic);
             socket.send(JSON.stringify({ topic: topic, payload: payload }));    
         }    
     } catch (error) {

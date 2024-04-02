@@ -3,19 +3,41 @@ const { execSync } = require('child_process');
 const nodeDiskInfo = require('node-disk-info');
 const { machineIdSync } = require('node-machine-id');
 
-function runCommandPowerShell(command) {
+/* function runCommandPowerShell(command) {
     try {
         const stdout = execSync(`powershell.exe -Command "${command}"`, {encoding: 'utf8'});
         console.log(`Результат: ${stdout}`);
         return stdout;
     } catch (error) {
+        console.error("******************* ERROR ********************");
         console.error(`Ошибка выполнения: ${error}`);
         if (error.stderr) {
             console.error(`Ошибка: ${error.stderr}`);
         }
         return error;
     }
+} */
+
+function runCommandPowerShell(command) {
+    try {
+        const stdout = execSync(`powershell.exe -Command "${command}"`, {encoding: 'utf8'});
+        console.log(`Результат: ${stdout}`);
+        return stdout;
+    } catch (error) {
+        console.error("******************* ERROR ********************");
+        const errorMessage = `Ошибка выполнения: ${error.message}`;
+        console.error(errorMessage);
+        if (error.stderr) {
+            const stderrMessage = `Ошибка: ${error.stderr}`;
+            console.error(stderrMessage);
+            return `${errorMessage}\n${stderrMessage}`;
+        }
+        return errorMessage;
+    }
 }
+
+
+
 
 function getFullInfo(isAdmin) {
     const result = {role: 'comp', admin: isAdmin, errors:[]};
