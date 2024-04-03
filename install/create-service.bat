@@ -4,17 +4,6 @@ SETLOCAL ENABLEEXTENSIONS
 :: Получение текущего пути к скрипту
 SET scriptPath=%~dp0
 
-:: Путь к инсталяционной папке
-SET installPath=C:\soft
-
-:: Создание директории, если она не существует
-IF NOT EXIST "%installPath%" (
-    MKDIR "%installPath%"
-)
-
-:: Копирование monitoring.exe в C:\soft
-COPY /Y "%scriptPath%monitoring.exe" "%installPath%\monitoring.exe"
-
 :: Путь к nssm.exe относительно текущего пути скрипта
 SET nssmPath=%scriptPath%nssm.exe
 
@@ -22,7 +11,7 @@ SET nssmPath=%scriptPath%nssm.exe
 SET serviceName=Monitoring
 
 :: Создание службы
-"%nssmPath%" install %serviceName% "%installPath%\monitoring.exe"
+"%nssmPath%" install %serviceName% "%scriptPath%monitoring.exe"
 
 :: Настройка автоматического перезапуска службы
 "%nssmPath%" set %serviceName% AppExit Default Restart
@@ -31,7 +20,6 @@ SET serviceName=Monitoring
 "%nssmPath%" start %serviceName%
 
 :: Очистка переменных
-SET installPath=
 SET nssmPath=
 SET serviceName=
 SET scriptPath=
