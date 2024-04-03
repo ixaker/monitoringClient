@@ -21,8 +21,8 @@ function runCommandPowerShell(command) {
     }
 }
 
-function getFullInfo(isAdmin) {
-    const result = {role: 'comp', admin: isAdmin, errors:[]};
+function getFullInfo(isAdmin, nickname) {
+    const result = {role: 'comp', admin: isAdmin, errors:[], nickname: nickname};
 
     try {
         result.name = os.hostname();    
@@ -142,7 +142,9 @@ function getInfoCPU() {
 }
 
 function getCpuLoad() {
-    try {
+    return 0; 
+
+/*     try {
         const stdout = execSync(`powershell -Command "(Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples.CookedValue"`).toString();
         console.log('getCpuLoad', stdout);
         const cpuLoad = parseInt(stdout.trim());
@@ -150,7 +152,7 @@ function getCpuLoad() {
     } catch (error) {
         console.error(`Ошибка при получении загрузки CPU: ${error}`);
         return 0; // или другое значение, указывающее на ошибку
-    }
+    } */
 }
 
 function getModelCPU() {

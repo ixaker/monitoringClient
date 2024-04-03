@@ -1,9 +1,14 @@
+require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const device = require('./device');
 const { io } = require('socket.io-client');
 const { execSync } = require('child_process');
 
 const isAdmin = checkIfAdmin();
-const socket = io('https://monitoring.qpart.com.ua:5000', { extraHeaders: { "type": "device" }});
+const devID = device.getID();
+let nickname = process.env.nickname || '';
+const socket = io('https://monitoring.qpart.com.ua:5000');
 
 socket.on("connect_error", (error) => {
     console.error('Connect_error:', error.type, error);
@@ -12,40 +17,33 @@ socket.on("connect_error", (error) => {
 socket.on("connect", () => {
     console.log('Connected to server');
     sendFullInfo();
+    check();
 });
 
-socket.on("message", (data) => {
-    const message = JSON.parse(data);
+socket.on(devID, (message) => {
+    console.log('message', message);
+
     const { topic, payload } = message;
-    
-    console.log('message', topic, payload);
+    const result = {'id': devID, 'topic': 'result'};
 
     if (topic === 'command') {
-        const result = {'id': device.getID()};
         result.result = device.runCommandPowerShell(payload);
         
-        send('result', result);
-        sendFullInfo();
+        socket.emit('result', result);
+    }else if (topic === 'nickname') {
+        nickname = payload;
+        updateEnvVariable('nickname', nickname);
     }
-});
 
-function send(topic, payload) {
-    try {
-        if (socket.connected) {
-            console.log('send', topic);
-            socket.send(JSON.stringify({ topic: topic, payload: payload }));    
-        }    
-    } catch (error) {
-        console.error('send',topic, error);    
-    }
-    console.log('stop - send()');
-}
+    sendFullInfo();
+});
 
 function sendFullInfo() {
     console.log('Start - sendFullInfo()');
     if (socket.connected) {
-        const payload = device.getFullInfo(isAdmin);
-        send('info', payload);
+        const payload = device.getFullInfo(isAdmin, nickname);
+        socket.emit('info', payload);
+        console.info(payload);
     }
 }
 
@@ -61,3 +59,40 @@ function checkIfAdmin() {
         return false;
     }
 }
+
+function check() {
+    const payload = device.getFullInfo(isAdmin, nickname);
+
+    payload.disk.forEach(element => {
+        if (element.crypt) {
+            let message = `Включился компьютер "${payload.name}" , и у него зашифрован диск '${element.mounted}'`;
+            socket.emit('telegram', message);
+        }
+    });
+}
+
+function updateEnvVariable(key, value) {
+    const envPath = path.resolve(process.cwd(), '.env');
+
+    // Проверяем, существует ли файл .env
+    if (!fs.existsSync(envPath)) {
+        // Если файла нет, создаём его
+        fs.writeFileSync(envPath, '', { flag: 'wx' }); // 'wx' - создать файл, только если он не существует
+    }
+
+    const envVars = fs.readFileSync(envPath, 'utf8').split('\n');
+    
+    const updatedEnvVars = envVars.map(line => {
+      const [currentKey, currentValue] = line.split('=');
+      if (currentKey === key) {
+        return `${key}=${value}`;
+      }
+      return line;
+    });
+  
+    if (!updatedEnvVars.some(line => line.startsWith(key))) {
+      updatedEnvVars.push(`${key}=${value}`);
+    }
+  
+    fs.writeFileSync(envPath, updatedEnvVars.join('\n'));
+  }
